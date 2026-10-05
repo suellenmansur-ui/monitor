@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monitor de Páginas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --fundo:#061b1f; --carta:#0b2b31; --carta2:#0e3a42; --borda:#17454e;
+  --texto:#eaf8fa; --fraco:#8fb6bc; --azul:#35cfdd; --azulf:#8df4ff;
+  --vermelho:#ff6b5e; --vermelhoE:#3a1512; --verde:#4fd79a; --amarelo:#f0c05a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fundo);color:var(--texto);font-family:Sora,system-ui,sans-serif;
+  padding:0 16px 60px;-webkit-font-smoothing:antialiased}
+.capa{position:relative;margin:0 -16px 20px;padding:26px 16px 22px;overflow:visible;
+  background:linear-gradient(160deg,#0a3d46 0%,#10606d 48%,#062a30 100%);
+  border-bottom:1px solid rgba(32,248,248,.28);border-radius:0 0 20px 20px;
+  box-shadow:0 20px 52px -30px rgba(32,248,248,.7)}
+@property --ang{syntax:'<angle>';initial-value:0deg;inherits:false}
+.capa::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:3px;pointer-events:none;
+  background:conic-gradient(from var(--ang) at 50% 50%,rgba(53,207,221,0) 0deg,rgba(53,207,221,0) 244deg,
+    rgba(53,207,221,.3) 282deg,rgba(141,244,255,.85) 330deg,#fff 352deg,#8df4ff 357deg,rgba(53,207,221,0) 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
+  filter:drop-shadow(0 0 7px rgba(53,207,221,.85));animation:volta 5.5s linear infinite}
+@keyframes volta{to{--ang:360deg}}
+.capa>div{position:relative;z-index:2;text-align:center}
+.olho{font-size:11px;font-weight:600;letter-spacing:.5em;text-indent:.5em;color:var(--azulf);opacity:.9}
+.nome{font-size:clamp(30px,8vw,48px);font-weight:800;letter-spacing:.1em;text-indent:.1em;margin-top:6px;
+  text-shadow:0 2px 0 rgba(0,0,0,.3),0 0 30px rgba(32,248,248,.3)}
+.nome i{font-style:normal;color:var(--azul)}
+.sub{font-size:13px;color:#bfe9ef;margin-top:7px}
+.faixa{max-width:900px;margin:0 auto}
+.linha{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,button{font-family:inherit;font-size:15px}
+input[type=text],input[type=password]{flex:1;min-width:180px;background:#04161a;border:1px solid var(--borda);
+  color:var(--texto);border-radius:10px;padding:12px 14px;outline:none}
+input:focus{border-color:var(--azul)}
+button{border:0;border-radius:10px;padding:12px 18px;font-weight:600;cursor:pointer;color:#042026;
+  background:var(--azul);transition:background .15s,color .15s}
+button:hover{background:#1b8b97;color:#fff}
+button.fantasma{background:#0d343b;color:var(--texto);border:1px solid var(--borda)}
+button.fantasma:hover{background:#09262b;color:#fff}
+button.perigo{background:#5a241f;color:#ffd9d4}
+button.perigo:hover{background:#3a1512;color:#fff}
+button:disabled{opacity:.5;cursor:default}
+.recado{margin:14px 0;padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.55;
+  background:#0d343b;border:1px solid var(--borda);color:var(--fraco)}
+.recado.ruim{background:var(--vermelhoE);border-color:#6b2b24;color:#ffd0ca}
+.recado.bom{background:#0c2f26;border-color:#1c5a44;color:#bdf0d8}
+.cartao{background:var(--carta);border:1px solid var(--borda);border-radius:14px;padding:16px 16px 14px;margin:14px 0}
+.topo{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.dom{font-size:18px;font-weight:700}
+.conta{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--fraco)}
+.selo{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-left:8px}
+.selo.ok{background:#0c2f26;color:var(--verde)}
+.selo.ruim{background:var(--vermelhoE);color:var(--vermelho)}
+.prob{margin:10px 0 0;padding:11px 13px;border-left:3px solid var(--vermelho);background:#13262a;border-radius:0 8px 8px 0}
+.prob b{display:block;font-size:14px;color:var(--vermelho)}
+.prob a{display:block;font-size:12px;color:var(--azulf);word-break:break-all;margin:3px 0;text-decoration:none}
+.prob a:hover{text-decoration:underline}
+.prob i{font-style:normal;font-size:12px;color:var(--fraco)}
+.todas{margin-top:12px;font-size:12px;font-family:"IBM Plex Mono",monospace;color:var(--fraco);
+  max-height:230px;overflow:auto;border-top:1px solid var(--borda);padding-top:10px}
+.todas div{padding:3px 0;word-break:break-all}
+.todas .mau{color:var(--vermelho)}
+.min{font-size:12px;color:var(--fraco);margin-top:6px}
+h2{font-size:13px;letter-spacing:.18em;color:var(--fraco);font-weight:600;margin:28px 0 10px}
+.rodape{text-align:center;font-size:12px;color:var(--fraco);margin-top:34px}
+@media(prefers-reduced-motion:reduce){.capa::before{animation:none}}
+</style>
+</head>
+<body>
+
+<div class="capa"><div>
+  <div class="olho">SUELLEN</div>
+  <div class="nome">MONI<i>T</i>OR</div>
+  <div class="sub">Suas páginas conferidas 3x por dia · aviso no Telegram quando algo quebra</div>
+</div></div>
+
+<div class="faixa">
+
+  <div id="trava" style="display:none">
+    <div class="recado">Digite a senha do Monitor pra abrir o painel.</div>
+    <div class="linha">
+      <input type="password" id="senha" placeholder="senha" autocomplete="current-password">
+      <button onclick="entra()">Entrar</button>
+    </div>
+  </div>
+
+  <div id="painel" style="display:none">
+    <div id="recado" class="recado" style="display:none"></div>
+
+    <h2>SEUS DOMÍNIOS</h2>
+    <div class="linha">
+      <input type="text" id="novo" placeholder="seusite.com.br" autocomplete="off">
+      <button onclick="addDom()">Adicionar</button>
+      <button class="fantasma" id="btvarre" onclick="varrer()">Varrer agora</button>
+    </div>
+    <div class="min" id="ultima"></div>
+
+    <div id="lista"></div>
+
+    <h2>AVISO NO TELEGRAM</h2>
+    <div class="recado" id="tgstatus">—</div>
+    <div class="linha">
+      <input type="text" id="tgtoken" placeholder="token do bot (do @BotFather)" autocomplete="off">
+      <input type="text" id="tgchat" placeholder="chat id" autocomplete="off" style="max-width:190px">
+      <button onclick="salvaTg()">Salvar e testar</button>
+    </div>
+    <div class="min">O teste manda uma mensagem agora. Se ela chegar, está pronto.</div>
+
+    <div class="rodape">Monitor · uso pessoal</div>
+  </div>
+</div>
+
+<script>
+var SENHA='', DADOS=null;
+function $(i){return document.getElementById(i)}
+function diz(t,tipo){var r=$('recado');if(!t){r.style.display='none';return;}r.className='recado'+(tipo?' '+tipo:'');r.textContent=t;r.style.display='block';}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function quando(ms){if(!ms)return 'nunca';var d=Math.round((Date.now()-ms)/60000);
+  if(d<1)return 'agora';if(d<60)return 'há '+d+' min';var h=Math.round(d/60);
+  if(h<48)return 'há '+h+'h';return 'há '+Math.round(h/24)+' dias';}
+
+async function api(caminho,corpo){
+  var o={headers:{'x-senha':SENHA}};
+  if(corpo){o.method='POST';o.headers['Content-Type']='application/json';o.body=JSON.stringify(corpo);}
+  var r=await fetch(caminho,o);
+  var j={};try{j=await r.json();}catch(e){}
+  if(r.status===401){abreTrava();throw new Error('senha');}
+  if(!r.ok)throw new Error(j.mensagem||j.erro||('falha '+r.status));
+  return j;
+}
+function abreTrava(){$('trava').style.display='';$('painel').style.display='none';}
+
+async function entra(){
+  SENHA=$('senha').value;
+  try{localStorage.setItem('mon_senha',SENHA);}catch(e){}
+  try{await carrega();$('trava').style.display='none';$('painel').style.display='';}
+  catch(e){}
+}
+
+async function carrega(){
+  DADOS=await api('/api/estado');
+  $('painel').style.display='';$('trava').style.display='none';
+  var u=DADOS.ultima;
+  $('ultima').textContent=u
+    ? 'Última varredura '+quando(u.quando)+' · '+u.checadas+' página(s) conferida(s) · '+u.com_problema+' com problema'+(u.completou?'':' · não deu tempo de terminar, o resto entra na próxima')
+    : 'Ainda não rodou nenhuma varredura.';
+  var tg=DADOS.telegram||{};
+  $('tgstatus').textContent=tg.tem?('✅ Ligado no chat '+tg.chat+'. Os avisos chegam aí.'):'Ainda não configurado — sem isso o Monitor confere, mas não te avisa.';
+  $('tgstatus').className='recado'+(tg.tem?' bom':'');
+  desenha();
+}
+
+function desenha(){
+  var html='';
+  if(!DADOS.dominios.length){
+    html='<div class="recado">Nenhum domínio ainda. Coloque o primeiro ali em cima — ele acha suas páginas sozinho pelo sitemap.</div>';
+  }
+  DADOS.dominios.forEach(function(d){
+    var ruim=d.problemas>0;
+    html+='<div class="cartao">'
+      +'<div class="topo"><div><span class="dom">'+esc(d.dominio)+'</span>'
+      +'<span class="selo '+(ruim?'ruim':'ok')+'">'+(ruim?d.problemas+' com problema':'tudo certo')+'</span></div>'
+      +'<div class="linha">'
+      +'<button class="fantasma" onclick="relista(\''+esc(d.dominio)+'\')">Procurar páginas de novo</button>'
+      +'<button class="perigo" onclick="remove(\''+esc(d.dominio)+'\')">Remover</button>'
+      +'</div></div>'
+      +'<div class="conta">'+d.paginas+' página(s) na lista · lista atualizada '+quando(d.listaEm)+'</div>';
+    d.itens.forEach(function(i){
+      var quais=i.probs.map(function(p){return DADOS.nomes[p.c]||p.c;}).join(' + ');
+      html+='<div class="prob"><b>🔴 '+esc(quais)+'</b>'
+        +'<a href="'+esc(i.url)+'" target="_blank" rel="noopener">'+esc(i.url)+'</a>'
+        +'<i>'+esc(i.probs[0].t)+'</i></div>';
+    });
+    if(d.todas.length){
+      html+='<div class="todas">';
+      d.todas.slice().sort(function(a,b){return (a.ok?1:0)-(b.ok?1:0);}).forEach(function(t){
+        html+='<div class="'+(t.ok?'':'mau')+'">'+(t.ok?'✓ ':'✕ ')+esc(t.url)+'</div>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+  });
+  $('lista').innerHTML=html;
+}
+
+async function addDom(){
+  var d=$('novo').value.trim();
+  if(!d)return;
+  diz('Adicionando '+d+' e procurando as páginas…');
+  try{
+    await api('/api/estado',{acao:'add',dominio:d});
+    $('novo').value='';
+    await api('/api/lista',{dominio:d});
+    await carrega();diz('Pronto. '+d+' entrou na varredura.','bom');
+  }catch(e){diz(String(e.message||e),'ruim');}
+}
+async function remove(d){
+  if(!confirm('Tirar '+d+' do Monitor? O histórico dele é apagado.'))return;
+  try{await api('/api/estado',{acao:'remove',dominio:d});await carrega();diz(d+' saiu do Monitor.');}
+  catch(e){diz(String(e.message||e),'ruim');}
+}
+async function relista(d){
+  diz('Procurando as páginas de '+d+'…');
+  try{var r=await api('/api/lista',{dominio:d});await carrega();
+    diz(d+': '+r.total+' página(s) na lista'+(r.novas?' ('+r.novas+' nova(s))':'')+'.','bom');}
+  catch(e){diz(String(e.message||e),'ruim');}
+}
+async function varrer(){
+  var b=$('btvarre');b.disabled=true;
+  var t0=Date.now(),cron=setInterval(function(){
+    diz('Varrendo suas páginas… '+Math.round((Date.now()-t0)/1000)+'s (pode levar alguns minutos)');},1000);
+  try{
+    var r=await api('/api/varre',{});
+    clearInterval(cron);
+    await carrega();
+    diz('Varredura feita em '+r.segundos+'s · '+r.checadas+' página(s) · '+r.com_problema+' com problema · '
+      +r.novos+' problema(s) novo(s) · '+(r.telegram?'avisei no Telegram.':'nada novo pra avisar.'),
+      r.com_problema?'ruim':'bom');
+  }catch(e){clearInterval(cron);diz(String(e.message||e),'ruim');}
+  finally{b.disabled=false;}
+}
+async function salvaTg(){
+  diz('Mandando a mensagem de teste…');
+  try{
+    await api('/api/estado',{acao:'telegram',token:$('tgtoken').value.trim(),chat:$('tgchat').value.trim()});
+    $('tgtoken').value='';await carrega();
+    diz('Telegram ligado. Confere aí, deve ter chegado uma mensagem.','bom');
+  }catch(e){diz(String(e.message||e),'ruim');}
+}
+
+(function(){
+  try{SENHA=localStorage.getItem('mon_senha')||'';}catch(e){}
+  carrega().catch(function(){abreTrava();});
+})();
+</script>
+</body>
+</html>

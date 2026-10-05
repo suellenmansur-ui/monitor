@@ -1,0 +1,22 @@
+{
+  "cleanUrls": true,
+  "crons": [
+    { "path": "/api/cron", "schedule": "10 11 * * *" }
+  ],
+  "functions": {
+    "api/varre.js": { "maxDuration": 300 },
+    "api/cron.js": { "maxDuration": 300 },
+    "api/lista.js": { "maxDuration": 120 },
+    "api/estado.js": { "maxDuration": 60 }
+  },
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate, max-age=0" },
+        { "key": "CDN-Cache-Control", "value": "no-store" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "no-store" }
+      ]
+    }
+  ]
+}
