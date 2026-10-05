@@ -68,6 +68,13 @@ button:disabled{opacity:.5;cursor:default}
   max-height:230px;overflow:auto;border-top:1px solid var(--borda);padding-top:10px}
 .todas div{padding:3px 0;word-break:break-all}
 .todas .mau{color:var(--vermelho)}
+.alerta{margin-top:10px;padding:11px 13px;border-left:3px solid var(--amarelo);background:#2a2412;
+  border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;color:#f3e2b4}
+.alerta b{color:#fff}
+.colar{margin-top:12px}
+.colar textarea{width:100%;min-height:140px;background:#04161a;border:1px solid var(--borda);color:var(--texto);
+  border-radius:10px;padding:11px 13px;font-family:"IBM Plex Mono",monospace;font-size:13px;outline:none;resize:vertical}
+.colar textarea:focus{border-color:var(--azul)}
 .min{font-size:12px;color:var(--fraco);margin-top:6px}
 h2{font-size:13px;letter-spacing:.18em;color:var(--fraco);font-weight:600;margin:28px 0 10px}
 .rodape{text-align:center;font-size:12px;color:var(--fraco);margin-top:34px}
@@ -170,9 +177,16 @@ function desenha(){
       +'<span class="selo '+(ruim?'ruim':'ok')+'">'+(ruim?d.problemas+' com problema':'tudo certo')+'</span></div>'
       +'<div class="linha">'
       +'<button class="fantasma" onclick="relista(\''+esc(d.dominio)+'\')">Procurar páginas de novo</button>'
+      +'<button class="fantasma" onclick="doRadar(\''+esc(d.dominio)+'\')">Trazer do Radar</button>'
+      +'<button class="fantasma" onclick="abreColar(\''+esc(d.dominio)+'\')">Colar lista de páginas</button>'
       +'<button class="perigo" onclick="remove(\''+esc(d.dominio)+'\')">Remover</button>'
       +'</div></div>'
-      +'<div class="conta">'+d.paginas+' página(s) na lista · lista atualizada '+quando(d.listaEm)+'</div>';
+      +'<div class="conta">'+d.paginas+' página(s) na lista · lista atualizada '+quando(d.listaEm)+'</div>'
+      +(d.paginas<=2 ? '<div class="alerta">\u26a0\ufe0f Só achei '+d.paginas+' página aqui. Esse site não tem sitemap e não linka as presells na home, então o Monitor não tem como adivinhar os endereços. Clique em <b>Trazer do Radar</b> ou em <b>Colar lista de páginas</b> e cole os endereços — só o que estiver nessa lista é conferido.</div>' : '')
+      +'<div id="colar_'+esc(d.dominio)+'" class="colar" style="display:none">'
+      +'<textarea id="txt_'+esc(d.dominio)+'" placeholder="Cole aqui os endereços das suas páginas, um por linha"></textarea>'
+      +'<div class="linha" style="margin-top:8px"><button onclick="salvaColadas(\''+esc(d.dominio)+'\')">Adicionar essas páginas</button>'
+      +'<button class="fantasma" onclick="abreColar(\''+esc(d.dominio)+'\')">Fechar</button></div></div>';
     d.itens.forEach(function(i){
       var quais=i.probs.map(function(p){return DADOS.nomes[p.c]||p.c;}).join(' + ');
       html+='<div class="prob"><b>🔴 '+esc(quais)+'</b>'
@@ -212,6 +226,30 @@ async function relista(d){
   try{var r=await api('/api/lista',{dominio:d});await carrega();
     diz(d+': '+r.total+' página(s) na lista'+(r.novas?' ('+r.novas+' nova(s))':'')+'.','bom');}
   catch(e){diz(String(e.message||e),'ruim');}
+}
+function abreColar(d){
+  var c=$('colar_'+d); if(!c)return;
+  c.style.display = c.style.display==='none' ? 'block' : 'none';
+}
+async function salvaColadas(d){
+  var t=$('txt_'+d); if(!t)return;
+  var urls=t.value.split(/[\s,]+/).map(function(x){return x.trim();}).filter(Boolean);
+  if(!urls.length){diz('Cole pelo menos um endereço.','ruim');return;}
+  diz('Adicionando '+urls.length+' endereço(s)…');
+  try{
+    var r=await api('/api/lista',{dominio:d,urls:urls});
+    t.value='';await carrega();
+    diz('Pronto: '+r.novas+' página(s) nova(s) entraram. Agora são '+r.total+'.','bom');
+  }catch(e){diz(String(e.message||e),'ruim');}
+}
+async function doRadar(d){
+  diz('Procurando no Radar as páginas de '+d+'…');
+  try{
+    var r=await api('/api/lista',{dominio:d,soRadar:true});
+    await carrega();
+    if(r.vazio){diz('O Radar não tem páginas guardadas de '+d+'. Use "Colar lista de páginas".','ruim');return;}
+    diz('Vieram do Radar: '+r.novas+' página(s) nova(s). Agora são '+r.total+'.','bom');
+  }catch(e){diz(String(e.message||e),'ruim');}
 }
 async function varrer(){
   var b=$('btvarre');b.disabled=true;
