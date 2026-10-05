@@ -144,20 +144,29 @@ async function descobrePaginas(dominio) {
     if (urls.length) break;
   }
   if (!urls.length) {
-    const r = await pega(base + '/', { ms: 20000 });
-    if (r.ok && r.txt) {
-      const vistos = new Set([base + '/']);
+    /* Sem sitemap: anda pelos links do site. Visita ate 15 paginas, mas
+       recolhe TODOS os endereços que encontrar no caminho — assim acha
+       tambem o que esta a dois cliques da home, nao so o menu. */
+    const vistos = new Set();
+    const fila = [base + '/'];
+    for (let i = 0; i < fila.length && i < 15 && vistos.size < 600; i++) {
+      const r = await pega(fila[i], { ms: 15000 });
+      vistos.add(fila[i]);
+      if (!r.ok || !r.txt) continue;
       const re = /<a\b[^>]*href\s*=\s*["']([^"']+)["']/gi;
       let m;
-      while ((m = re.exec(r.txt)) && vistos.size < 400) {
+      while ((m = re.exec(r.txt)) && vistos.size < 600) {
         let u = m[1].trim();
         if (/^(#|mailto:|tel:|javascript:)/i.test(u)) continue;
-        if (!/^https?:\/\//i.test(u)) { try { u = new URL(u, base + '/').href; } catch (e) { continue; } }
+        if (!/^https?:\/\//i.test(u)) { try { u = new URL(u, fila[i]).href; } catch (e) { continue; } }
         if (host(u) !== dominio) continue;
-        vistos.add(u.split('#')[0]);
+        u = u.split('#')[0];
+        if (vistos.has(u)) continue;
+        vistos.add(u);
+        if (fila.length < 15) fila.push(u);
       }
-      urls = [...vistos];
     }
+    urls = [...vistos];
   }
   const fora = /\.(jpg|jpeg|png|gif|webp|svg|css|js|pdf|zip|mp4|webm|ico|woff2?|ttf)(\?|$)/i;
   const limpas = new Set();
