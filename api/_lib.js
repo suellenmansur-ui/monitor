@@ -2,11 +2,14 @@
    Guarda tudo no Upstash Redis (o mesmo que o Radar usa, com outro prefixo).
    Nenhuma chave sai daqui pro navegador. */
 
-const U = process.env.UPSTASH_REDIS_REST_URL || '';
-const T = process.env.UPSTASH_REDIS_REST_TOKEN || '';
+/* Aceita os dois nomes: os que a integracao Upstash/KV da Vercel cria sozinha
+   (KV_REST_API_URL / KV_REST_API_TOKEN, que e o que o Radar usa) e os nomes
+   avulsos do painel da Upstash. Assim basta conectar o banco no projeto. */
+const U = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '';
+const T = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || '';
 
 async function redis(comando) {
-  if (!U || !T) throw new Error('Falta UPSTASH_REDIS_REST_URL / UPSTASH_REDIS_REST_TOKEN');
+  if (!U || !T) throw new Error('Banco nao conectado: falta KV_REST_API_URL / KV_REST_API_TOKEN (conecte o Upstash no projeto, em Storage)');
   const r = await fetch(U, {
     method: 'POST',
     headers: { Authorization: 'Bearer ' + T, 'Content-Type': 'application/json' },
