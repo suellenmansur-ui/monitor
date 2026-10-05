@@ -137,11 +137,41 @@ async function urlsDoSitemap(url, profundidade) {
    e se não houver sitemap, lendo os links da home. */
 async function descobrePaginas(dominio) {
   const base = 'https://' + dominio;
-  const tentativas = ['/sitemap.xml', '/sitemap_index.xml', '/wp-sitemap.xml', '/sitemap-index.xml'];
   let urls = [];
+
+  /* 1) o robots.txt costuma dizer onde fica o sitemap */
+  const doRobots = [];
+  try {
+    const rb = await pega(base + '/robots.txt', { ms: 10000 });
+    if (rb.ok && rb.txt) {
+      for (const m of rb.txt.matchAll(/^\s*sitemap:\s*(\S+)/gim)) doRobots.push(m[1]);
+    }
+  } catch (e) { /* sem robots, segue */ }
+
+  /* 2) os caminhos de sitemap mais usados, inclusive os do WordPress e do Yoast */
+  const tentativas = [
+    ...doRobots,
+    base + '/sitemap.xml', base + '/sitemap_index.xml', base + '/sitemap-index.xml',
+    base + '/wp-sitemap.xml', base + '/wp-sitemap-posts-page-1.xml', base + '/wp-sitemap-posts-post-1.xml',
+    base + '/page-sitemap.xml', base + '/post-sitemap.xml',
+  ];
   for (const cam of tentativas) {
-    urls = await urlsDoSitemap(base + cam, 0);
-    if (urls.length) break;
+    const achou = await urlsDoSitemap(cam, 0);
+    if (achou.length) { urls = achou; break; }
+  }
+
+  /* 3) a lista de páginas do próprio WordPress, quando ele deixa ler */
+  if (!urls.length) {
+    for (const cam of ['/wp-json/wp/v2/pages?per_page=100&_fields=link', '/wp-json/wp/v2/posts?per_page=100&_fields=link']) {
+      try {
+        const r = await pega(base + cam, { ms: 15000 });
+        if (!r.ok || !r.txt || r.txt[0] !== '[') continue;
+        const lista = JSON.parse(r.txt);
+        if (Array.isArray(lista) && lista.length) {
+          for (const it of lista) if (it && it.link) urls.push(it.link);
+        }
+      } catch (e) { /* bloqueado ou desligado: segue */ }
+    }
   }
   if (!urls.length) {
     /* Sem sitemap: anda pelos links do site. Visita ate 15 paginas, mas

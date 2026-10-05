@@ -95,11 +95,7 @@ async function juntaUrls(dominio, urls) {
 /* Atualiza a lista de páginas de um domínio (sitemap, home e Radar). */
 async function atualizaLista(dominio) {
   const mapa = await getJSON(K.pg(dominio), {});
-  let achadas = await descobrePaginas(dominio);
-  try {
-    const doRadar = await importaDoRadar(dominio);
-    achadas = [...new Set([...achadas, ...doRadar])];
-  } catch (e) { /* o Radar e um extra, nao pode derrubar a lista */ }
+  const achadas = await descobrePaginas(dominio);
   const agora = Date.now();
   let novas = 0;
   for (const u of achadas) {
