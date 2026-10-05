@@ -177,14 +177,13 @@ function desenha(){
       +'<span class="selo '+(ruim?'ruim':'ok')+'">'+(ruim?d.problemas+' com problema':'tudo certo')+'</span></div>'
       +'<div class="linha">'
       +'<button class="fantasma" onclick="relista(\''+esc(d.dominio)+'\')">Procurar páginas de novo</button>'
-      +'<button class="fantasma" onclick="doRadar(\''+esc(d.dominio)+'\')">Trazer do Radar</button>'
       +'<button class="fantasma" onclick="abreColar(\''+esc(d.dominio)+'\')">Colar lista de páginas</button>'
       +'<button class="perigo" onclick="remove(\''+esc(d.dominio)+'\')">Remover</button>'
       +'</div></div>'
       +'<div class="conta">'+d.paginas+' página(s) na lista · lista atualizada '+quando(d.listaEm)+'</div>'
-      +(d.paginas<=2 ? '<div class="alerta">\u26a0\ufe0f Só achei '+d.paginas+' página aqui. Esse site não tem sitemap e não linka as presells na home, então o Monitor não tem como adivinhar os endereços. Clique em <b>Trazer do Radar</b> ou em <b>Colar lista de páginas</b> e cole os endereços — só o que estiver nessa lista é conferido.</div>' : '')
+      +(d.paginas<=2 ? '<div class="alerta">\u26a0\ufe0f Só achei '+d.paginas+' página aqui, então o Monitor está vigiando quase nada. Esse site não publica a lista das próprias páginas (sem sitemap, sem link na home). Clique em <b>Colar lista de páginas</b> e cole os endereços das suas presells — só o que estiver nessa lista é conferido. No WordPress: <b>Páginas ▸ Todas as páginas</b>, selecione a tabela toda e copie; pode colar do jeito que vier.</div>' : '')
       +'<div id="colar_'+esc(d.dominio)+'" class="colar" style="display:none">'
-      +'<textarea id="txt_'+esc(d.dominio)+'" placeholder="Cole aqui os endereços das suas páginas, um por linha"></textarea>'
+      +'<textarea id="txt_'+esc(d.dominio)+'" placeholder="Cole os endereços das suas páginas aqui. Aceita de tudo: a URL inteira, só /slug, ou o texto copiado da lista de Páginas do WordPress."></textarea>'
       +'<div class="linha" style="margin-top:8px"><button onclick="salvaColadas(\''+esc(d.dominio)+'\')">Adicionar essas páginas</button>'
       +'<button class="fantasma" onclick="abreColar(\''+esc(d.dominio)+'\')">Fechar</button></div></div>';
     d.itens.forEach(function(i){
@@ -233,22 +232,13 @@ function abreColar(d){
 }
 async function salvaColadas(d){
   var t=$('txt_'+d); if(!t)return;
-  var urls=t.value.split(/[\s,]+/).map(function(x){return x.trim();}).filter(Boolean);
-  if(!urls.length){diz('Cole pelo menos um endereço.','ruim');return;}
-  diz('Adicionando '+urls.length+' endereço(s)…');
+  var texto=t.value;
+  if(!texto.trim()){diz('Cole pelo menos um endereço.','ruim');return;}
+  diz('Lendo o que você colou…');
   try{
-    var r=await api('/api/lista',{dominio:d,urls:urls});
+    var r=await api('/api/lista',{dominio:d,texto:texto});
     t.value='';await carrega();
     diz('Pronto: '+r.novas+' página(s) nova(s) entraram. Agora são '+r.total+'.','bom');
-  }catch(e){diz(String(e.message||e),'ruim');}
-}
-async function doRadar(d){
-  diz('Procurando no Radar as páginas de '+d+'…');
-  try{
-    var r=await api('/api/lista',{dominio:d,soRadar:true});
-    await carrega();
-    if(r.vazio){diz('O Radar não tem páginas guardadas de '+d+'. Use "Colar lista de páginas".','ruim');return;}
-    diz('Vieram do Radar: '+r.novas+' página(s) nova(s). Agora são '+r.total+'.','bom');
   }catch(e){diz(String(e.message||e),'ruim');}
 }
 async function varrer(){
