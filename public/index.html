@@ -6,122 +6,155 @@
 <title>Monitor de Páginas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  --fundo:#061b1f; --carta:#0b2b31; --carta2:#0e3a42; --borda:#17454e;
-  --texto:#eaf8fa; --fraco:#8fb6bc; --azul:#35cfdd; --azulf:#8df4ff;
-  --vermelho:#ff6b5e; --vermelhoE:#3a1512; --verde:#4fd79a; --amarelo:#f0c05a;
+  --chao:#eceef2; --papel:#ffffff; --linha:#dcdfe6; --linha2:#eceef1;
+  --tinta:#11151c; --meio:#5c6472; --fraco:#8b93a1;
+  --marinho:#16284b; --marinho2:#0d1a33;
+  --ruim:#c0271f; --ruimfundo:#fdf0ef; --bom:#0e7a48; --bomfundo:#eef7f1; --atencao:#9a6400; --atencaofundo:#fdf6e8;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--fundo);color:var(--texto);font-family:Sora,system-ui,sans-serif;
-  padding:0 16px 60px;-webkit-font-smoothing:antialiased}
-.capa{position:relative;margin:0 -16px 20px;padding:26px 16px 22px;overflow:visible;
-  background:linear-gradient(160deg,#0a3d46 0%,#10606d 48%,#062a30 100%);
-  border-bottom:1px solid rgba(32,248,248,.28);border-radius:0 0 20px 20px;
-  box-shadow:0 20px 52px -30px rgba(32,248,248,.7)}
-@property --ang{syntax:'<angle>';initial-value:0deg;inherits:false}
-.capa::before{content:'';position:absolute;inset:-1px;border-radius:inherit;padding:3px;pointer-events:none;
-  background:conic-gradient(from var(--ang) at 50% 50%,rgba(53,207,221,0) 0deg,rgba(53,207,221,0) 244deg,
-    rgba(53,207,221,.3) 282deg,rgba(141,244,255,.85) 330deg,#fff 352deg,#8df4ff 357deg,rgba(53,207,221,0) 360deg);
-  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
-  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;
-  filter:drop-shadow(0 0 7px rgba(53,207,221,.85));animation:volta 5.5s linear infinite}
-@keyframes volta{to{--ang:360deg}}
-.capa>div{position:relative;z-index:2;text-align:center}
-.olho{font-size:11px;font-weight:600;letter-spacing:.5em;text-indent:.5em;color:var(--azulf);opacity:.9}
-.nome{font-size:clamp(30px,8vw,48px);font-weight:800;letter-spacing:.1em;text-indent:.1em;margin-top:6px;
-  text-shadow:0 2px 0 rgba(0,0,0,.3),0 0 30px rgba(32,248,248,.3)}
-.nome i{font-style:normal;color:var(--azul)}
-.sub{font-size:13px;color:#bfe9ef;margin-top:7px}
-.faixa{max-width:900px;margin:0 auto}
-.linha{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-input,button{font-family:inherit;font-size:15px}
-input[type=text],input[type=password]{flex:1;min-width:180px;background:#04161a;border:1px solid var(--borda);
-  color:var(--texto);border-radius:10px;padding:12px 14px;outline:none}
-input:focus{border-color:var(--azul)}
-button{border:0;border-radius:10px;padding:12px 18px;font-weight:600;cursor:pointer;color:#042026;
-  background:var(--azul);transition:background .15s,color .15s}
-button:hover{background:#1b8b97;color:#fff}
-button.fantasma{background:#0d343b;color:var(--texto);border:1px solid var(--borda)}
-button.fantasma:hover{background:#09262b;color:#fff}
-button.perigo{background:#5a241f;color:#ffd9d4}
-button.perigo:hover{background:#3a1512;color:#fff}
-button:disabled{opacity:.5;cursor:default}
-.recado{margin:14px 0;padding:12px 14px;border-radius:10px;font-size:14px;line-height:1.55;
-  background:#0d343b;border:1px solid var(--borda);color:var(--fraco)}
-.recado.ruim{background:var(--vermelhoE);border-color:#6b2b24;color:#ffd0ca}
-.recado.bom{background:#0c2f26;border-color:#1c5a44;color:#bdf0d8}
-.cartao{background:var(--carta);border:1px solid var(--borda);border-radius:14px;padding:16px 16px 14px;margin:14px 0}
-.topo{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.dom{font-size:18px;font-weight:700}
-.conta{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--fraco)}
-.selo{display:inline-block;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;margin-left:8px}
-.selo.ok{background:#0c2f26;color:var(--verde)}
-.selo.ruim{background:var(--vermelhoE);color:var(--vermelho)}
-.prob{margin:10px 0 0;padding:11px 13px;border-left:3px solid var(--vermelho);background:#13262a;border-radius:0 8px 8px 0}
-.prob b{display:block;font-size:14px;color:var(--vermelho)}
-.prob a{display:block;font-size:12px;color:var(--azulf);word-break:break-all;margin:3px 0;text-decoration:none}
-.prob a:hover{text-decoration:underline}
-.prob i{font-style:normal;font-size:12px;color:var(--fraco)}
-.todas{margin-top:12px;font-size:12px;font-family:"IBM Plex Mono",monospace;color:var(--fraco);
-  max-height:230px;overflow:auto;border-top:1px solid var(--borda);padding-top:10px}
-.todas div{padding:3px 0;word-break:break-all}
-.todas .mau{color:var(--vermelho)}
-.alerta{margin-top:10px;padding:11px 13px;border-left:3px solid var(--amarelo);background:#2a2412;
-  border-radius:0 8px 8px 0;font-size:13px;line-height:1.6;color:#f3e2b4}
-.alerta b{color:#fff}
-.colar{margin-top:12px}
-.colar textarea{width:100%;min-height:140px;background:#04161a;border:1px solid var(--borda);color:var(--texto);
-  border-radius:10px;padding:11px 13px;font-family:"IBM Plex Mono",monospace;font-size:13px;outline:none;resize:vertical}
-.colar textarea:focus{border-color:var(--azul)}
-.min{font-size:12px;color:var(--fraco);margin-top:6px}
-h2{font-size:13px;letter-spacing:.18em;color:var(--fraco);font-weight:600;margin:28px 0 10px}
-.rodape{text-align:center;font-size:12px;color:var(--fraco);margin-top:34px}
-@media(prefers-reduced-motion:reduce){.capa::before{animation:none}}
+html,body{margin:0;background:var(--chao);color:var(--tinta);
+  font-family:"Public Sans",system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding-bottom:70px}
+.faixa{max-width:1000px;margin:0 auto;padding:0 16px}
+
+/* ---- barra de cima ---- */
+.barra{background:var(--marinho);color:#fff;padding:18px 0 17px;border-bottom:3px solid var(--marinho2)}
+.barra .faixa{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.marca{font-family:"Bricolage Grotesque",system-ui,sans-serif;font-weight:800;font-size:25px;letter-spacing:-.02em;line-height:1}
+.marca span{opacity:.5;font-weight:700}
+.tg{font-size:12.5px;color:#b9c4d8}
+.tg b{color:#fff;font-weight:600}
+.tg a{color:#fff;text-decoration:underline;text-underline-offset:3px;cursor:pointer;margin-left:8px}
+
+/* ---- números ---- */
+.placar{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--linha);
+  border:1px solid var(--linha);border-radius:10px;overflow:hidden;margin:18px 0}
+.placar div{background:var(--papel);padding:14px 16px}
+.placar .n{font-family:"DM Mono",monospace;font-size:27px;font-weight:500;line-height:1.1;letter-spacing:-.02em}
+.placar .r{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--fraco);margin-top:5px;font-weight:600}
+.placar .alto .n{color:var(--ruim)}
+
+/* ---- blocos ---- */
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--fraco);
+  font-weight:700;margin:26px 0 9px}
+.caixa{background:var(--papel);border:1px solid var(--linha);border-radius:10px;padding:15px 16px}
+.par{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.par{grid-template-columns:1fr}.placar{grid-template-columns:1fr}}
+label{display:block;font-size:12px;font-weight:600;color:var(--meio);margin-bottom:6px}
+.linha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=text],input[type=password],textarea{flex:1;min-width:0;background:#fbfcfd;border:1px solid var(--linha);
+  color:var(--tinta);border-radius:7px;padding:10px 12px;font:15px "Public Sans",sans-serif;outline:none}
+textarea{width:100%;min-height:150px;font:13px/1.6 "DM Mono",monospace;resize:vertical}
+input:focus,textarea:focus{border-color:var(--marinho);box-shadow:0 0 0 3px rgba(22,40,75,.1)}
+button{border:0;border-radius:7px;padding:10px 15px;font:600 14px "Public Sans",sans-serif;cursor:pointer;
+  background:var(--marinho);color:#fff;transition:background .14s,color .14s}
+button:hover{background:var(--marinho2);color:#fff}
+button.leve{background:#eef0f4;color:var(--tinta);border:1px solid var(--linha)}
+button.leve:hover{background:var(--marinho);color:#fff;border-color:var(--marinho)}
+button.sai{background:#fbeceb;color:var(--ruim);border:1px solid #f3d4d1}
+button.sai:hover{background:var(--ruim);color:#fff;border-color:var(--ruim)}
+button:disabled{opacity:.45;cursor:default}
+.dica{font-size:12px;color:var(--fraco);margin-top:8px;line-height:1.55}
+
+/* ---- recado ---- */
+.recado{margin:16px 0;padding:12px 14px;border-radius:8px;font-size:14px;line-height:1.55;
+  background:var(--papel);border:1px solid var(--linha);border-left:4px solid var(--marinho)}
+.recado.ruim{background:var(--ruimfundo);border-color:#f0cdc9;border-left-color:var(--ruim);color:#7c1a15}
+.recado.bom{background:var(--bomfundo);border-color:#cde6d8;border-left-color:var(--bom);color:#0b5c37}
+
+/* ---- domínio ---- */
+.dom{background:var(--papel);border:1px solid var(--linha);border-radius:10px;margin:12px 0;overflow:hidden}
+.domtopo{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:14px 16px;border-bottom:1px solid var(--linha2)}
+.nome{font-family:"DM Mono",monospace;font-size:16px;font-weight:500;letter-spacing:-.01em;word-break:break-all}
+.chip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  padding:3px 8px;border-radius:5px;margin-left:9px;vertical-align:2px}
+.chip.ok{background:var(--bomfundo);color:var(--bom)}
+.chip.mau{background:var(--ruimfundo);color:var(--ruim)}
+.conta{font-family:"DM Mono",monospace;font-size:12px;color:var(--fraco);padding:9px 16px 0}
+.quebrada{margin:12px 16px 0;border:1px solid #f0cdc9;border-left:4px solid var(--ruim);
+  border-radius:0 8px 8px 0;background:var(--ruimfundo);padding:11px 13px}
+.quebrada .q1{font-size:14px;font-weight:700;color:var(--ruim)}
+.quebrada a{display:block;font-family:"DM Mono",monospace;font-size:12.5px;color:#7c1a15;
+  word-break:break-all;margin:4px 0 2px;text-decoration:none}
+.quebrada a:hover{text-decoration:underline}
+.quebrada .q2{font-size:12.5px;color:#8d4b45}
+.aviso{margin:12px 16px 0;padding:11px 13px;border:1px solid #efdfbd;border-left:4px solid var(--atencao);
+  border-radius:0 8px 8px 0;background:var(--atencaofundo);font-size:13px;line-height:1.6;color:#6f4a05}
+.aviso b{color:#4a3103}
+.paginas{margin:14px 0 0;border-top:1px solid var(--linha2);padding:11px 16px 14px;
+  max-height:260px;overflow:auto;font-family:"DM Mono",monospace;font-size:12.5px}
+.paginas div{padding:3px 0;color:var(--meio);word-break:break-all}
+.paginas .x{color:var(--ruim);font-weight:500}
+.colar{padding:0 16px 14px}
+.rodape{text-align:center;font-size:12px;color:var(--fraco);margin-top:30px}
 </style>
 </head>
 <body>
 
-<div class="capa"><div>
-  <div class="olho">SUELLEN</div>
-  <div class="nome">MONI<i>T</i>OR</div>
-  <div class="sub">Suas páginas conferidas 3x por dia · aviso no Telegram quando algo quebra</div>
+<div class="barra"><div class="faixa">
+  <div class="marca">Monitor<span> / páginas</span></div>
+  <div class="tg" id="tgresumo"></div>
 </div></div>
 
 <div class="faixa">
 
   <div id="trava" style="display:none">
-    <div class="recado">Digite a senha do Monitor pra abrir o painel.</div>
-    <div class="linha">
+    <div class="recado">Digite a senha do Monitor para abrir o painel.</div>
+    <div class="caixa"><div class="linha">
       <input type="password" id="senha" placeholder="senha" autocomplete="current-password">
       <button onclick="entra()">Entrar</button>
-    </div>
+    </div></div>
   </div>
 
   <div id="painel" style="display:none">
+
+    <div class="placar">
+      <div><div class="n" id="nPag">—</div><div class="r">Páginas vigiadas</div></div>
+      <div id="boxProb"><div class="n" id="nProb">—</div><div class="r">Com problema</div></div>
+      <div><div class="n" id="nQuando">—</div><div class="r">Última varredura</div></div>
+    </div>
+
     <div id="recado" class="recado" style="display:none"></div>
 
-    <h2>SEUS DOMÍNIOS</h2>
-    <div class="linha">
-      <input type="text" id="novo" placeholder="seusite.com.br" autocomplete="off">
-      <button onclick="addDom()">Adicionar</button>
-      <button class="fantasma" id="btvarre" onclick="varrer()">Varrer agora</button>
+    <div class="par">
+      <div class="caixa">
+        <label for="novaPag">Publicou uma página nova? Cole o endereço dela</label>
+        <div class="linha">
+          <input type="text" id="novaPag" placeholder="https://seusite.com/produto-review" autocomplete="off">
+          <button onclick="addPagina()">Vigiar</button>
+        </div>
+        <div class="dica">Se o domínio ainda não estiver aqui, ele entra junto. É o jeito mais rápido — 5 segundos por página.</div>
+      </div>
+      <div class="caixa">
+        <label for="novo">Domínio inteiro</label>
+        <div class="linha">
+          <input type="text" id="novo" placeholder="seusite.com.br" autocomplete="off">
+          <button onclick="addDom()">Adicionar</button>
+          <button class="leve" id="btvarre" onclick="varrer()">Varrer agora</button>
+        </div>
+        <div class="dica">Ele procura as páginas sozinho. Em site com sitemap desligado, só o que você cadastrar é conferido.</div>
+      </div>
     </div>
-    <div class="min" id="ultima"></div>
 
+    <div id="tgcaixa" class="caixa" style="display:none;margin-top:14px">
+      <label>Para onde mando os avisos (Telegram)</label>
+      <div class="linha">
+        <input type="text" id="tgtoken" placeholder="token do bot (do @BotFather)" autocomplete="off">
+        <input type="text" id="tgchat" placeholder="chat id" style="max-width:170px" autocomplete="off">
+        <button onclick="salvaTg()">Salvar e testar</button>
+        <button class="leve" onclick="abreTg()">Fechar</button>
+      </div>
+      <div class="dica">O teste manda uma mensagem agora. Se ela chegar, está pronto.</div>
+    </div>
+
+    <h2>Seus domínios</h2>
     <div id="lista"></div>
 
-    <h2>AVISO NO TELEGRAM</h2>
-    <div class="recado" id="tgstatus">—</div>
-    <div class="linha">
-      <input type="text" id="tgtoken" placeholder="token do bot (do @BotFather)" autocomplete="off">
-      <input type="text" id="tgchat" placeholder="chat id" autocomplete="off" style="max-width:190px">
-      <button onclick="salvaTg()">Salvar e testar</button>
-    </div>
-    <div class="min">O teste manda uma mensagem agora. Se ela chegar, está pronto.</div>
-
-    <div class="rodape">Monitor · uso pessoal</div>
+    <div class="rodape">Monitor · uso pessoal da Suellen</div>
   </div>
 </div>
 
@@ -130,9 +163,11 @@ var SENHA='', DADOS=null;
 function $(i){return document.getElementById(i)}
 function diz(t,tipo){var r=$('recado');if(!t){r.style.display='none';return;}r.className='recado'+(tipo?' '+tipo:'');r.textContent=t;r.style.display='block';}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function quando(ms){if(!ms)return 'nunca';var d=Math.round((Date.now()-ms)/60000);
-  if(d<1)return 'agora';if(d<60)return 'há '+d+' min';var h=Math.round(d/60);
-  if(h<48)return 'há '+h+'h';return 'há '+Math.round(h/24)+' dias';}
+function quando(ms){if(!ms)return '—';var d=Math.round((Date.now()-ms)/60000);
+  if(d<1)return 'agora';if(d<60)return d+' min';var h=Math.round(d/60);
+  if(h<48)return h+'h';return Math.round(h/24)+'d';}
+function dominioDe(u){try{var s=String(u).trim();if(!/^https?:\/\//i.test(s))s='https://'+s;
+  return new URL(s).hostname.replace(/^www\./,'').toLowerCase();}catch(e){return '';}}
 
 async function api(caminho,corpo){
   var o={headers:{'x-senha':SENHA}};
@@ -144,58 +179,67 @@ async function api(caminho,corpo){
   return j;
 }
 function abreTrava(){$('trava').style.display='';$('painel').style.display='none';}
+function abreTg(){var c=$('tgcaixa');c.style.display=c.style.display==='none'?'block':'none';}
 
 async function entra(){
   SENHA=$('senha').value;
   try{localStorage.setItem('mon_senha',SENHA);}catch(e){}
-  try{await carrega();$('trava').style.display='none';$('painel').style.display='';}
-  catch(e){}
+  try{await carrega();}catch(e){}
 }
 
 async function carrega(){
   DADOS=await api('/api/estado');
   $('painel').style.display='';$('trava').style.display='none';
-  var u=DADOS.ultima;
-  $('ultima').textContent=u
-    ? 'Última varredura '+quando(u.quando)+' · '+u.checadas+' página(s) conferida(s) · '+u.com_problema+' com problema'+(u.completou?'':' · não deu tempo de terminar, o resto entra na próxima')
-    : 'Ainda não rodou nenhuma varredura.';
+  var pag=0,prob=0;
+  DADOS.dominios.forEach(function(d){pag+=d.paginas;prob+=d.problemas;});
+  $('nPag').textContent=pag;
+  $('nProb').textContent=prob;
+  $('boxProb').className=prob?'alto':'';
+  $('nQuando').textContent=DADOS.ultima?quando(DADOS.ultima.quando):'—';
   var tg=DADOS.telegram||{};
-  $('tgstatus').textContent=tg.tem?('✅ Ligado no chat '+tg.chat+'. Os avisos chegam aí.'):'Ainda não configurado — sem isso o Monitor confere, mas não te avisa.';
-  $('tgstatus').className='recado'+(tg.tem?' bom':'');
+  $('tgresumo').innerHTML=tg.tem
+    ? 'Avisos no Telegram: <b>ligados</b><a onclick="abreTg()">trocar</a>'
+    : '<b>Sem aviso no Telegram</b> — ele confere, mas não te avisa.<a onclick="abreTg()">configurar</a>';
   desenha();
 }
 
 function desenha(){
   var html='';
   if(!DADOS.dominios.length){
-    html='<div class="recado">Nenhum domínio ainda. Coloque o primeiro ali em cima — ele acha suas páginas sozinho pelo sitemap.</div>';
+    html='<div class="caixa">Nenhum domínio ainda. Cole o endereço de uma página ali em cima e ele cadastra o domínio junto.</div>';
   }
   DADOS.dominios.forEach(function(d){
     var ruim=d.problemas>0;
-    html+='<div class="cartao">'
-      +'<div class="topo"><div><span class="dom">'+esc(d.dominio)+'</span>'
-      +'<span class="selo '+(ruim?'ruim':'ok')+'">'+(ruim?d.problemas+' com problema':'tudo certo')+'</span></div>'
+    html+='<div class="dom">'
+      +'<div class="domtopo"><div><span class="nome">'+esc(d.dominio)+'</span>'
+      +'<span class="chip '+(ruim?'mau':'ok')+'">'+(ruim?d.problemas+' com problema':'tudo certo')+'</span></div>'
       +'<div class="linha">'
-      +'<button class="fantasma" onclick="relista(\''+esc(d.dominio)+'\')">Procurar páginas de novo</button>'
-      +'<button class="fantasma" onclick="abreColar(\''+esc(d.dominio)+'\')">Colar lista de páginas</button>'
-      +'<button class="perigo" onclick="remove(\''+esc(d.dominio)+'\')">Remover</button>'
+      +'<button class="leve" onclick="relista(\''+esc(d.dominio)+'\')">Procurar páginas</button>'
+      +'<button class="leve" onclick="abreColar(\''+esc(d.dominio)+'\')">Colar lista</button>'
+      +'<button class="sai" onclick="remove(\''+esc(d.dominio)+'\')">Remover</button>'
       +'</div></div>'
-      +'<div class="conta">'+d.paginas+' página(s) na lista · lista atualizada '+quando(d.listaEm)+'</div>'
-      +(d.paginas<=2 ? '<div class="alerta">\u26a0\ufe0f Só achei '+d.paginas+' página aqui, então o Monitor está vigiando quase nada. Esse site não publica a lista das próprias páginas (sem sitemap, sem link na home). Clique em <b>Colar lista de páginas</b> e cole os endereços das suas presells — só o que estiver nessa lista é conferido. No WordPress: <b>Páginas ▸ Todas as páginas</b>, selecione a tabela toda e copie; pode colar do jeito que vier.</div>' : '')
-      +'<div id="colar_'+esc(d.dominio)+'" class="colar" style="display:none">'
-      +'<textarea id="txt_'+esc(d.dominio)+'" placeholder="Cole os endereços das suas páginas aqui. Aceita de tudo: a URL inteira, só /slug, ou o texto copiado da lista de Páginas do WordPress."></textarea>'
-      +'<div class="linha" style="margin-top:8px"><button onclick="salvaColadas(\''+esc(d.dominio)+'\')">Adicionar essas páginas</button>'
-      +'<button class="fantasma" onclick="abreColar(\''+esc(d.dominio)+'\')">Fechar</button></div></div>';
+      +'<div class="conta">'+d.paginas+' página(s) vigiada(s) · lista atualizada há '+quando(d.listaEm)+'</div>';
+
+    if(d.paginas<=2){
+      html+='<div class="aviso">Só conheço '+d.paginas+' página deste site, então estou vigiando quase nada. '
+        +'Se ele tem o sitemap desligado, não existe como descobrir as páginas de fora — use <b>Colar lista</b> '
+        +'ou vá cadastrando cada página nova pelo campo lá de cima.</div>';
+    }
     d.itens.forEach(function(i){
       var quais=i.probs.map(function(p){return DADOS.nomes[p.c]||p.c;}).join(' + ');
-      html+='<div class="prob"><b>🔴 '+esc(quais)+'</b>'
+      html+='<div class="quebrada"><div class="q1">'+esc(quais)+'</div>'
         +'<a href="'+esc(i.url)+'" target="_blank" rel="noopener">'+esc(i.url)+'</a>'
-        +'<i>'+esc(i.probs[0].t)+'</i></div>';
+        +'<div class="q2">'+esc(i.probs[0].t)+'</div></div>';
     });
+    html+='<div id="colar_'+esc(d.dominio)+'" class="colar" style="display:none">'
+      +'<textarea id="txt_'+esc(d.dominio)+'" placeholder="Cole os endereços das páginas deste site. Aceita de tudo: URL inteira, só /slug, ou o texto copiado da lista de Páginas do WordPress."></textarea>'
+      +'<div class="linha" style="margin-top:9px"><button onclick="salvaColadas(\''+esc(d.dominio)+'\')">Adicionar</button>'
+      +'<button class="leve" onclick="abreColar(\''+esc(d.dominio)+'\')">Fechar</button></div></div>';
+
     if(d.todas.length){
-      html+='<div class="todas">';
+      html+='<div class="paginas">';
       d.todas.slice().sort(function(a,b){return (a.ok?1:0)-(b.ok?1:0);}).forEach(function(t){
-        html+='<div class="'+(t.ok?'':'mau')+'">'+(t.ok?'✓ ':'✕ ')+esc(t.url)+'</div>';
+        html+='<div class="'+(t.ok?'':'x')+'">'+(t.ok?'· ':'✕ ')+esc(t.url)+'</div>';
       });
       html+='</div>';
     }
@@ -204,6 +248,19 @@ function desenha(){
   $('lista').innerHTML=html;
 }
 
+async function addPagina(){
+  var u=$('novaPag').value.trim();
+  if(!u){diz('Cole o endereço da página.','ruim');return;}
+  var d=dominioDe(u);
+  if(!d){diz('Esse endereço não parece certo.','ruim');return;}
+  diz('Cadastrando…');
+  try{
+    await api('/api/estado',{acao:'add',dominio:d});
+    var r=await api('/api/lista',{dominio:d,texto:u});
+    $('novaPag').value='';await carrega();
+    diz(r.novas?('Pronto. Essa página entrou na vigilância de '+d+'.'):'Essa página já estava sendo vigiada.','bom');
+  }catch(e){diz(String(e.message||e),'ruim');}
+}
 async function addDom(){
   var d=$('novo').value.trim();
   if(!d)return;
@@ -211,8 +268,9 @@ async function addDom(){
   try{
     await api('/api/estado',{acao:'add',dominio:d});
     $('novo').value='';
-    await api('/api/lista',{dominio:d});
-    await carrega();diz('Pronto. '+d+' entrou na varredura.','bom');
+    var r=await api('/api/lista',{dominio:d});
+    await carrega();
+    diz(d+' entrou. Achei '+(r.total||0)+' página(s).', (r.total||0)>2?'bom':'');
   }catch(e){diz(String(e.message||e),'ruim');}
 }
 async function remove(d){
@@ -223,35 +281,29 @@ async function remove(d){
 async function relista(d){
   diz('Procurando as páginas de '+d+'…');
   try{var r=await api('/api/lista',{dominio:d});await carrega();
-    diz(d+': '+r.total+' página(s) na lista'+(r.novas?' ('+r.novas+' nova(s))':'')+'.','bom');}
+    diz(d+': '+r.total+' página(s)'+(r.novas?' ('+r.novas+' nova(s))':' — nenhuma nova')+'.', r.novas?'bom':'');}
   catch(e){diz(String(e.message||e),'ruim');}
 }
-function abreColar(d){
-  var c=$('colar_'+d); if(!c)return;
-  c.style.display = c.style.display==='none' ? 'block' : 'none';
-}
+function abreColar(d){var c=$('colar_'+d); if(c)c.style.display=c.style.display==='none'?'block':'none';}
 async function salvaColadas(d){
   var t=$('txt_'+d); if(!t)return;
-  var texto=t.value;
-  if(!texto.trim()){diz('Cole pelo menos um endereço.','ruim');return;}
+  if(!t.value.trim()){diz('Cole pelo menos um endereço.','ruim');return;}
   diz('Lendo o que você colou…');
   try{
-    var r=await api('/api/lista',{dominio:d,texto:texto});
+    var r=await api('/api/lista',{dominio:d,texto:t.value});
     t.value='';await carrega();
-    diz('Pronto: '+r.novas+' página(s) nova(s) entraram. Agora são '+r.total+'.','bom');
+    diz(r.novas+' página(s) nova(s) entraram. Agora são '+r.total+'.','bom');
   }catch(e){diz(String(e.message||e),'ruim');}
 }
 async function varrer(){
   var b=$('btvarre');b.disabled=true;
   var t0=Date.now(),cron=setInterval(function(){
-    diz('Varrendo suas páginas… '+Math.round((Date.now()-t0)/1000)+'s (pode levar alguns minutos)');},1000);
+    diz('Varrendo suas páginas… '+Math.round((Date.now()-t0)/1000)+'s');},1000);
   try{
     var r=await api('/api/varre',{});
-    clearInterval(cron);
-    await carrega();
+    clearInterval(cron);await carrega();
     diz('Varredura feita em '+r.segundos+'s · '+r.checadas+' página(s) · '+r.com_problema+' com problema · '
-      +r.novos+' problema(s) novo(s) · '+(r.telegram?'avisei no Telegram.':'nada novo pra avisar.'),
-      r.com_problema?'ruim':'bom');
+      +(r.telegram?'avisei no Telegram.':'nada novo pra avisar.'), r.com_problema?'ruim':'bom');
   }catch(e){clearInterval(cron);diz(String(e.message||e),'ruim');}
   finally{b.disabled=false;}
 }
@@ -259,8 +311,8 @@ async function salvaTg(){
   diz('Mandando a mensagem de teste…');
   try{
     await api('/api/estado',{acao:'telegram',token:$('tgtoken').value.trim(),chat:$('tgchat').value.trim()});
-    $('tgtoken').value='';await carrega();
-    diz('Telegram ligado. Confere aí, deve ter chegado uma mensagem.','bom');
+    $('tgtoken').value='';$('tgcaixa').style.display='none';await carrega();
+    diz('Telegram ligado. Deve ter chegado uma mensagem.','bom');
   }catch(e){diz(String(e.message||e),'ruim');}
 }
 
