@@ -76,6 +76,8 @@ async function pega(url, opt) {
   } finally { clearTimeout(t); }
 }
 
+function espera(ms) { return new Promise((ok) => setTimeout(ok, ms)); }
+
 function host(u) { try { return new URL(u).hostname.replace(/^www\./, '').toLowerCase(); } catch (e) { return ''; } }
 function limpaDominio(d) {
   let s = String(d || '').trim().toLowerCase();
@@ -222,7 +224,14 @@ const NOMES = {
 async function confere(url, antes) {
   const dom = host(url);
   const probs = [];
-  const r = await pega(url, { ms: 20000 });
+  let r = await pega(url, { ms: 20000 });
+
+  /* Falhou? Espera uns segundos e tenta de novo antes de acusar.
+     Assim um soluço de 1 minuto da hospedagem não vira alarme falso. */
+  if (r.erro || !(r.status >= 200 && r.status < 400)) {
+    await espera(8000);
+    r = await pega(url, { ms: 25000 });
+  }
 
   if (r.erro || !(r.status >= 200 && r.status < 400)) {
     probs.push({ c: 'fora_do_ar', t: r.erro ? ('não respondeu: ' + r.erro) : ('respondeu ' + r.status) });
@@ -237,7 +246,8 @@ async function confere(url, antes) {
   }
 
   for (const link of saidas.slice(0, 2)) {
-    const a = await pega(link, { ms: 15000 });
+    let a = await pega(link, { ms: 15000 });
+    if (a.erro || !(a.status >= 200 && a.status < 400)) { await espera(8000); a = await pega(link, { ms: 20000 }); }
     if (a.erro || !(a.status >= 200 && a.status < 400)) {
       probs.push({ c: 'link_quebrado', t: host(link) + (a.erro ? (' — ' + a.erro) : ' — respondeu ' + a.status) });
     } else if (ofertaMorta(a)) {

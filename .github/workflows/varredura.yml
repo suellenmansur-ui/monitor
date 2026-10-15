@@ -1,0 +1,64 @@
+# Varredura do Monitor o dia todo, de graça.
+# O GitHub chama o /api/cron do Monitor a cada 30 minutos.
+# (O GitHub pode atrasar alguns minutos nos horários de pico — é normal.)
+#
+# Precisa de 2 "secrets" no repositório (Settings ▸ Secrets and variables ▸ Actions):
+#   MONITOR_URL  -> endereço do Monitor, ex.: https://monitor-xxxx.vercel.app
+#   CRON_SECRET  -> o MESMO valor da variável CRON_SECRET do projeto na Vercel
+name: Varredura do Monitor
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: varredura
+  cancel-in-progress: false
+
+jobs:
+  varre:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Chama a varredura
+        env:
+          MONITOR_URL: ${{ secrets.MONITOR_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$MONITOR_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "Faltam os secrets MONITOR_URL e/ou CRON_SECRET." ; exit 1
+          fi
+          URL="${MONITOR_URL%/}/api/cron"
+          code=$(curl -sS -o resposta.json -w '%{http_code}' --max-time 320 \
+                 -H "Authorization: Bearer $CRON_SECRET" "$URL" || echo 000)
+          echo "HTTP $code"; cat resposta.json || true; echo
+          if [ "$code" != "200" ]; then
+            echo "::error::A varredura respondeu $code (401 = CRON_SECRET diferente do da Vercel)"; exit 1
+          fi
+
+  # O GitHub desliga agendamentos de repositório sem nenhuma atividade por 60 dias.
+  # Este passo faz um commit vazio quando o último commit tem mais de 45 dias,
+  # pra varredura nunca parar sozinha.
+  mantem-ligado:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Commit vazio se o repositório estiver parado
+        run: |
+          ultimo=$(git log -1 --format=%ct)
+          agora=$(date +%s)
+          if [ $(( (agora - ultimo) / 86400 )) -ge 45 ]; then
+            git config user.name "monitor-bot"
+            git config user.email "monitor-bot@users.noreply.github.com"
+            git commit --allow-empty -m "mantém a varredura automática ligada"
+            git push
+          else
+            echo "Repositório ativo, nada a fazer."
+          fi

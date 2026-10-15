@@ -1,4 +1,6 @@
-/* GET /api/cron -> a varredura automática (3x por dia, pela Vercel).
+/* GET /api/cron -> a varredura automática.
+   Quem chama a cada 30 minutos é o GitHub Actions (.github/workflows/varredura.yml);
+   a Vercel ainda chama 1x por dia às 8h10 como reserva.
    Só roda com o segredo certo: ninguém dispara isso pela internet. */
 const { json } = require('./_lib');
 const { varre, avisa } = require('./_motor');
