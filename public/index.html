@@ -89,6 +89,10 @@ button:disabled{opacity:.45;cursor:default}
   max-height:260px;overflow:auto;font-family:"DM Mono",monospace;font-size:12.5px}
 .paginas div{padding:3px 0;color:var(--meio);word-break:break-all}
 .paginas .x{color:var(--ruim);font-weight:500}
+.paginas div{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.tira{flex:0 0 auto;background:none;border:1px solid transparent;color:#9aa1ad;font:600 12px "Public Sans",sans-serif;padding:2px 8px;border-radius:5px;cursor:pointer}
+.paginas div:hover .tira{border-color:#f3d4d1;color:var(--ruim)}
+.tira:hover{background:var(--ruim) !important;color:#fff !important;border-color:var(--ruim) !important}
 .colar{padding:0 16px 14px}
 .rodape{text-align:center;font-size:12px;color:var(--fraco);margin-top:30px}
 </style>
@@ -239,7 +243,8 @@ function desenha(){
     if(d.todas.length){
       html+='<div class="paginas">';
       d.todas.slice().sort(function(a,b){return (a.ok?1:0)-(b.ok?1:0);}).forEach(function(t){
-        html+='<div class="'+(t.ok?'':'x')+'">'+(t.ok?'· ':'✕ ')+esc(t.url)+'</div>';
+        html+='<div class="'+(t.ok?'':'x')+'"><span>'+(t.ok?'· ':'✕ ')+esc(t.url)+'</span>'
+          +'<button class="tira" title="Parar de vigiar esta página" data-d="'+esc(d.dominio)+'" data-u="'+esc(t.url)+'" onclick="tiraPagina(this)">excluir</button></div>';
       });
       html+='</div>';
     }
@@ -273,6 +278,14 @@ async function addDom(){
     diz(d+' entrou. Achei '+(r.total||0)+' página(s).', (r.total||0)>2?'bom':'');
   }catch(e){diz(String(e.message||e),'ruim');}
 }
+async function tiraPagina(bt){
+  var d=bt.getAttribute('data-d'),u=bt.getAttribute('data-u');
+  if(!confirm('Parar de vigiar esta página?\n\n'+u+'\n\nO domínio e as outras páginas continuam no Monitor.'))return;
+  bt.disabled=true;
+  try{await api('/api/estado',{acao:'tirapagina',dominio:d,url:u});await carrega();diz('Página excluída do Monitor.');}
+  catch(e){bt.disabled=false;diz(String(e.message||e),'ruim');}
+}
+
 async function remove(d){
   if(!confirm('Tirar '+d+' do Monitor? O histórico dele é apagado.'))return;
   try{await api('/api/estado',{acao:'remove',dominio:d});await carrega();diz(d+' saiu do Monitor.');}

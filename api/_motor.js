@@ -9,6 +9,7 @@ const K = {
   cur: 'mon:cur',
   run: 'mon:run',
   pg: (d) => 'mon:pg:' + d,
+  ign: (d) => 'mon:ign:' + d,   // páginas que ela excluiu: a busca automática não traz de volta
 };
 
 const DIA = 86400000;
@@ -82,6 +83,11 @@ async function importaDoRadar(dominio) {
    (do Radar ou colada na mao). */
 async function juntaUrls(dominio, urls) {
   const mapa = await getJSON(K.pg(dominio), {});
+  /* colar de novo um endereço excluído = ela quer vigiar de novo */
+  const ign = await getJSON(K.ign(dominio), []);
+  const voltam = new Set(urls.map((u) => String(u).split('#')[0].replace(/\/$/, '')));
+  const ignNovo = ign.filter((u) => !voltam.has(u));
+  if (ignNovo.length !== ign.length) await setJSON(K.ign(dominio), ignNovo);
   const agora = Date.now();
   let novas = 0;
   for (const u of urls) {
@@ -95,7 +101,8 @@ async function juntaUrls(dominio, urls) {
 /* Atualiza a lista de páginas de um domínio (sitemap, home e Radar). */
 async function atualizaLista(dominio) {
   const mapa = await getJSON(K.pg(dominio), {});
-  const achadas = await descobrePaginas(dominio);
+  const ign = new Set(await getJSON(K.ign(dominio), []));
+  const achadas = (await descobrePaginas(dominio)).filter((u) => !ign.has(u));
   const agora = Date.now();
   let novas = 0;
   for (const u of achadas) {

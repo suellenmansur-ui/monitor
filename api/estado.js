@@ -42,11 +42,24 @@ module.exports = async (req, res) => {
     return json(res, 200, { ok: true, dominio: d });
   }
 
+  if (acao === 'tirapagina') {
+    const d = limpaDominio(b.dominio);
+    const url = String(b.url || '').trim();
+    if (!d || !url) return json(res, 400, { erro: 'pagina' });
+    const mapa = await getJSON(K.pg(d), {});
+    delete mapa[url];
+    await setJSON(K.pg(d), mapa);
+    const ign = await getJSON(K.ign(d), []);
+    if (!ign.includes(url)) { ign.push(url); await setJSON(K.ign(d), ign.slice(-2000)); }
+    return json(res, 200, { ok: true });
+  }
+
   if (acao === 'remove') {
     const d = limpaDominio(b.dominio);
     const doms = (await getJSON(K.doms, [])).filter((x) => x.dominio !== d);
     await setJSON(K.doms, doms);
     await setJSON(K.pg(d), {});
+    await setJSON(K.ign(d), []);
     return json(res, 200, { ok: true });
   }
 
