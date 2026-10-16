@@ -89,10 +89,24 @@ function limpaDominio(d) {
    Se um link aponta pra cá, ele não entra na conta de "link de saída". */
 const NEUTROS = /(^|\.)(google|googletagmanager|google-analytics|gstatic|googleapis|doubleclick|facebook|fb|instagram|twitter|x|t|linkedin|pinterest|youtube|youtu|tiktok|whatsapp|wa|telegram|cloudflare|jsdelivr|unpkg|cdnjs|bootstrapcdn|fontawesome|gravatar|wp|wordpress|w3|schema|paypal|stripe|trustpilot|bbb|archive|wikipedia)\.(com|net|org|io|be|me|br|co)$/i;
 
-/* Tira do HTML todos os links que saem do próprio domínio.
-   Esses são os candidatos a link de afiliado. */
+/* Hosts que sao CITACAO, nao link de afiliado. As paginas dela terminam com
+   uma secao Sources, com link pra estudo. Esses sites ainda por cima respondem
+   403 pra robo — era isso que fazia o Monitor gritar "link de afiliado
+   quebrado" numa pagina que estava perfeita. */
+const CITACAO = /(^|\.)(nih|ncbi|nlm|who|wiley|onlinelibrary|sciencedirect|elsevier|springer|nature|frontiersin|tandfonline|jamanetwork|bmj|cochrane|researchgate|academia|doi|semanticscholar|plos|mdpi|pubmed|ieee|ieeexplore|books|scholar|jstor|mayoclinic|clevelandclinic|healthline|webmd|medicalnewstoday|examine|gimitec)\.[a-z.]+$/i;
+
+/* Cara de link de afiliado: o dominio das redes que ela roda, ou os parametros
+   que toda rede poe na URL. */
+const REDE = /(^|\.)(buygoods|maxweb|mweb[a-z]{2,}|digistore24|checkout-ds24|clickbank|treejammer|primesavingslink|diginear|hotmart|monetizze)\.[a-z.]+$/i;
+const PARAM = /[?&](aff_id|affid|affiliate_id|affiliate_slug|aff|a_aid|hop|subid|sub1|cid|clickid|_ef_transaction_id|oid)=/i;
+
+/* Tira do HTML os links que saem do proprio dominio e fica so com os que tem
+   cara de link de afiliado. O desempate e simples e vale pra qualquer rede:
+   o botao de comprar aparece 5, 10 vezes na pagina; uma citacao aparece uma
+   vez so. Antes isto pegava os 4 primeiros hosts e testava os 2 primeiros —
+   e o segundo quase sempre era uma citacao da secao Sources. */
 function linksDeSaida(html, dominioDaPagina) {
-  const achados = new Map();
+  const porHost = new Map();
   const re = /<a\b[^>]*href\s*=\s*["']([^"']+)["']/gi;
   let m;
   while ((m = re.exec(html))) {
@@ -100,11 +114,18 @@ function linksDeSaida(html, dominioDaPagina) {
     if (!/^https?:\/\//i.test(bruto)) continue;
     const h = host(bruto);
     if (!h || h === dominioDaPagina || h.endsWith('.' + dominioDaPagina)) continue;
-    if (NEUTROS.test(h)) continue;
-    if (!achados.has(h)) achados.set(h, bruto);
-    if (achados.size >= 4) break;
+    if (NEUTROS.test(h) || CITACAO.test(h)) continue;
+    const ja = porHost.get(h);
+    if (ja) ja.n++;
+    else porHost.set(h, { url: bruto, n: 1, marca: REDE.test(h) || PARAM.test(bruto) });
   }
-  return [...achados.values()];
+  const bons = [...porHost.values()]
+    .filter((x) => x.marca || x.n >= 2)
+    .sort((a, b) => (b.marca ? 1 : 0) - (a.marca ? 1 : 0) || b.n - a.n);
+  if (bons.length) return bons.slice(0, 3).map((x) => x.url);
+  /* nenhum com cara de afiliado: fica com o que mais se repete, pra regra do
+     "a pagina perdeu o link" continuar funcionando */
+  return [...porHost.values()].sort((a, b) => b.n - a.n).slice(0, 1).map((x) => x.url);
 }
 
 /* A página de destino existe mas a oferta acabou? */
@@ -248,8 +269,13 @@ async function confere(url, antes) {
   for (const link of saidas.slice(0, 2)) {
     let a = await pega(link, { ms: 15000 });
     if (a.erro || !(a.status >= 200 && a.status < 400)) { await espera(8000); a = await pega(link, { ms: 20000 }); }
+    /* 401, 403 e 429 NAO sao link quebrado: e o site recusando robo. So acusa
+       quando o endereco some de verdade (404/410), quando da erro no servidor
+       de destino ou quando nao responde. */
+    const recusouRobo = a.status === 401 || a.status === 403 || a.status === 429;
+    if (recusouRobo) continue;
     if (a.erro || !(a.status >= 200 && a.status < 400)) {
-      probs.push({ c: 'link_quebrado', t: host(link) + (a.erro ? (' — ' + a.erro) : ' — respondeu ' + a.status) });
+      probs.push({ c: 'link_quebrado', t: 'o link de afiliado (' + host(link) + ')' + (a.erro ? (' ' + a.erro) : ' respondeu ' + a.status) });
     } else if (ofertaMorta(a)) {
       probs.push({ c: 'oferta_pausada', t: 'o destino (' + host(link) + ') abre, mas parece pausado ou esgotado' });
     }
