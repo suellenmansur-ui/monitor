@@ -254,7 +254,25 @@ async function confere(url, antes) {
     r = await pega(url, { ms: 25000 });
   }
 
+  /* Terceira e última chance: pergunta só se a página responde, SEM baixar o
+     corpo. Página pesada (meio mega) que demora pra baixar deixa de virar
+     alarme falso — o que importa aqui é se ela está de pé. */
   if (r.erro || !(r.status >= 200 && r.status < 400)) {
+    await espera(15000);
+    const leve = await pega(url, { ms: 30000, corpo: false });
+    if (!leve.erro && leve.status >= 200 && leve.status < 400) {
+      return { probs: [], saidas: (antes && antes.saidas) || [], ms: leve.ms };
+    }
+    r = (!leve.erro || r.erro) ? leve : r;
+  }
+
+  if (r.erro || !(r.status >= 200 && r.status < 400)) {
+    /* 403, 429 e 503 não são página fora do ar: é a hospedagem barrando o
+       nosso verificador. Não é problema que ela possa resolver, então não
+       vira alerta. */
+    if (!r.erro && (r.status === 403 || r.status === 429 || r.status === 503)) {
+      return { probs: [], saidas: (antes && antes.saidas) || [], ms: r.ms };
+    }
     probs.push({ c: 'fora_do_ar', t: r.erro ? ('não respondeu: ' + r.erro) : ('respondeu ' + r.status) });
     return { probs, saidas: (antes && antes.saidas) || [], ms: r.ms };
   }
